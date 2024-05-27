@@ -1,0 +1,17 @@
+# used in
+# https://gitlab.com/redhat/centos-stream/tang/-/tree/c10s
+
+summary: rpmverify test
+
+execute:
+    how: tmt
+
+discover:
+
+  - name: test
+    how: shell
+    tests:
+      - name: rpmverify
+        test: 'rpmverify $(rpm -qa | grep tang)'
+        duration: 2m
+

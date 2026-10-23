@@ -1,0 +1,43 @@
+# used in
+# https://gitlab.com/redhat/centos-stream/rpms/tang
+
+summary: package update scenario
+
+execute:
+    how: tmt
+
+prepare:
+  - how: shell
+    order: 90
+    script:
+      # remove installed (tested) tang and any leftovers
+      - dnf -y remove '*tang*'
+      # install older tang
+      - dnf -y install tang curl --disablerepo test-artifacts
+
+discover:
+
+  - name: Update_scenario_setup
+    how: fmf
+    url: https://github.com/RedHat-SP-Security/tang-tests
+    ref: master
+    test:
+      - /Sanity/simple-tang-server-start-default-port
+    environment:
+      IN_PLACE_UPGRADE: "old"
+
+  - name: Update_tang_package
+    how: shell
+    tests:
+      - name: tang_update
+        test: dnf -y update '*tang*'
+        duration: 2m
+
+  - name: Test_scenario_post-update
+    how: fmf
+    url: https://github.com/RedHat-SP-Security/tang-tests
+    ref: master
+    test:
+      - /Sanity/simple-tang-server-start-default-port
+    environment:
+      IN_PLACE_UPGRADE: "new"
